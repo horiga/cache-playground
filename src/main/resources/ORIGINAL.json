@@ -1,0 +1,8 @@
+{
+  "success": true,
+  "kv": {
+    "hoge": "fuga",
+    "kotlin": "Hello, Kotlin",
+    "error": "exception"
+  }
+}

@@ -27,6 +27,9 @@ dependencies {
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+	implementation("com.github.ben-manes.caffeine:caffeine:2.7.0")
+	implementation("io.micrometer:micrometer-registry-prometheus:1.1.4")
+
 	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
