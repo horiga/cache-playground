@@ -14,6 +14,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.context.properties.NestedConfigurationProperty
 import org.springframework.boot.runApplication
+import org.springframework.cache.annotation.CacheConfig
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.stereotype.Repository
@@ -91,16 +92,15 @@ class PlaygroundRestController(
 }
 
 @Service
+@CacheConfig(cacheNames = ["playground"])
 class PlaygroundCacheService(val originalRepository: OriginalRepository) {
-
-    @Cacheable("playground")
+    @Cacheable
     fun getFromSpringCache(key: String): String = originalRepository.readOriginal(key)
             ?: "the '$key' does not exist in cache!!"
 }
 
 @Repository
 class OriginalRepository(properties: PlaygroundProperties) {
-
     companion object {
         val log = LoggerFactory.getLogger(OriginalRepository::class.java)!!
         val objectMapper = jacksonObjectMapper()
@@ -118,8 +118,9 @@ class OriginalRepository(properties: PlaygroundProperties) {
     fun readOriginal(key: String): String? {
         try {
             log.info("[load cache from $filePath] key=$key")
-            if (!Files.exists(FileSystems.getDefault().getPath(filePath)))
+            if (!Files.exists(FileSystems.getDefault().getPath(filePath))) {
                 throw RuntimeException("original file is not exists")
+            }
             val original: Original = objectMapper.readValue(FileInputStream(File(filePath)))
             return when {
                 !original.success -> throw RuntimeException("system error!!")
@@ -133,7 +134,8 @@ class OriginalRepository(properties: PlaygroundProperties) {
                 }
             }
         } catch (e: Exception) {
-            log.warn("handle unknown error, return previous values.")
+            log.warn("!!!! Handle unknown error, return previous values. !!!!", e)
+            // 何かしらの原因で失敗した場合に、前回成功した結果があればそれを返す
             return previous?.kv?.get(key)
         }
     }
